@@ -1,0 +1,59 @@
+run:
+  timeout: 5m
+  tests: true
+  exclude-dirs:
+    - vendor
+    - third_party
+  exclude-files:
+    - ".*_gen.go"
+  issues-exit-code: 1
+
+linters:
+  disable-all: true # Better to be explicit
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - ineffassign
+    - typecheck
+    - unused
+    - revive
+    - gocritic
+    - gofmt
+    - goimports
+    - prealloc
+    - misspell
+    - gosimple
+
+linters-settings:
+  revive:
+    ignore-generated-header: true
+    severity: warning
+    rules:
+      - name: var-naming
+      - name: package-comments
+      - name: export-shadow
+      - name: indent-error-flow
+      - name: line-length-limit
+        arguments: [120]
+      - name: dot-imports
+        arguments: ["disallow"]
+
+  gocritic:
+    enabled-checks:
+      - appendAssign
+      - ifElseChain
+      - rangeValCopy
+      - unnecessaryTypeAssert
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-use-default: false
+  exclude-rules:
+    - path: "_test.go"
+      linters:
+        - errcheck
+    - linters:
+        - revive
+      text: "comment formatting"

@@ -1,59 +1,70 @@
+version: 2
+
 run:
   timeout: 5m
   tests: true
-  exclude-dirs:
-    - vendor
-    - third_party
-  exclude-files:
-    - ".*_gen.go"
   issues-exit-code: 1
+  modules-download-mode: readonly
 
 linters:
-  disable-all: true # Better to be explicit
+  disable-all: true
   enable:
     - govet
     - errcheck
     - staticcheck
     - ineffassign
-    - typecheck
-    - unused
-    - revive
+    - gosec
     - gocritic
-    - gofmt
-    - goimports
-    - prealloc
+    - gocyclo
+    - bodyclose
     - misspell
-    - gosimple
+    - unparam
+    - whitespace
+    - godot
+    # - revive
 
-linters-settings:
+settings:
   revive:
-    ignore-generated-header: true
     severity: warning
     rules:
       - name: var-naming
-      - name: package-comments
-      - name: export-shadow
       - name: indent-error-flow
-      - name: line-length-limit
-        arguments: [120]
-      - name: dot-imports
-        arguments: ["disallow"]
+      - name: unreachable-code
+      - name: blank-imports
+      - name: context-as-first-argument
+      - name: cognitive-complexity
+        arguments: [15]
 
   gocritic:
     enabled-checks:
       - appendAssign
-      - ifElseChain
+      - boolExprSimplify
       - rangeValCopy
-      - unnecessaryTypeAssert
+      - ruleguard
+
+  gosec:
+    excludes:
+      - G104
 
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
   exclude-use-default: false
   exclude-rules:
-    - path: "_test.go"
+    - path: _test\.go
       linters:
         - errcheck
+        - gosec
+        - gocyclo
+
+    - path: main\.go
+      text: "forgetting to check returned errors"
+      linters:
+        - errcheck
+
     - linters:
         - revive
-      text: "comment formatting"
+      text: "package-comments"
+    - linters:
+        - revive
+      text: "exported"

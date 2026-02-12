@@ -81,7 +81,6 @@ func (l *Logger) log(level Level, msg string, fields map[string]any) {
 	}
 
 	l.mu.Lock()
-	defer l.mu.Unlock()
 
 	entry := LogEntry{
 		Timestamp: time.Now().UTC().Format(time.RFC3339Nano),
@@ -101,11 +100,14 @@ func (l *Logger) log(level Level, msg string, fields map[string]any) {
 	}
 
 	data, _ := json.Marshal(entry)
-	fmt.Fprintf(l.out, "%s\n", data)
+	_, _ = fmt.Fprintf(l.out, "%s\n", data)
 
 	if level == FATAL {
+		l.mu.Unlock() // Explicitly unlock before exit
 		os.Exit(1)
 	}
+	
+	l.mu.Unlock()
 }
 
 func (l *Logger) Info(msg string, fields ...map[string]any) {

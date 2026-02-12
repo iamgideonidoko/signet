@@ -53,7 +53,6 @@ func main() {
 		logger.Error("Failed to connect to database", map[string]any{"error": err.Error()})
 		os.Exit(1)
 	}
-	defer repo.Close()
 	logger.Info("Connected to PostgreSQL", map[string]any{
 		"host": cfg.Database.Host,
 		"port": cfg.Database.Port,
@@ -62,6 +61,7 @@ func main() {
 	// Health check database
 	if err := repo.HealthCheck(context.Background()); err != nil {
 		logger.Error("Database health check failed", map[string]any{"error": err.Error()})
+		_ = repo.Close()
 		os.Exit(1)
 	}
 
@@ -79,13 +79,25 @@ func main() {
 	})
 	if err != nil {
 		logger.Error("Failed to connect to Redis", map[string]any{"error": err.Error()})
+		_ = repo.Close()
 		os.Exit(1)
 	}
-	defer redisCache.Close()
 	logger.Info("Connected to Redis", map[string]any{
 		"host": cfg.Redis.Host,
 		"port": cfg.Redis.Port,
 	})
+	
+	// Setup cleanup - only after all resources are successfully initialized
+	defer func() {
+		if err := repo.Close(); err != nil {
+			logger.Error("Failed to close database connection", map[string]any{"error": err.Error()})
+		}
+	}()
+	defer func() {
+		if err := redisCache.Close(); err != nil {
+			logger.Error("Failed to close Redis connection", map[string]any{"error": err.Error()})
+		}
+	}()
 
 	// Initialize services
 	identService := services.NewIdentificationService(repo, redisCache, &cfg.Fingerprint)
@@ -168,6 +180,5 @@ func main() {
 
 	if err := app.Listen(addr); err != nil {
 		logger.Error("Server error", map[string]any{"error": err.Error()})
-		os.Exit(1)
 	}
 }

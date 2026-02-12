@@ -41,7 +41,7 @@ func NewIdentificationService(
 	}
 }
 
-// Identify performs the "Healer" logic: probabilistic matching with self-healing
+// Identify performs the "Healer" logic: probabilistic matching with self-healing.
 func (s *IdentificationService) Identify(ctx context.Context, req models.IdentifyRequest) (*models.IdentifyResponse, error) {
 	// Generate hardware hash for cache lookup
 	hardwareHash := similarity.ComputeHardwareHash(req.Signals)
@@ -92,7 +92,7 @@ func (s *IdentificationService) Identify(ctx context.Context, req models.Identif
 
 	// Step 5: Compute similarity scores and find best match
 	var bestMatch *models.Identification
-	var bestScore float64 = 0.0
+	var bestScore = 0.0
 
 	for _, candidate := range candidates {
 		candidateVector := s.calculator.ExtractFeatures(candidate.Signals)
@@ -158,7 +158,7 @@ func (s *IdentificationService) Identify(ctx context.Context, req models.Identif
 	}, nil
 }
 
-// extractIPSubnet returns the /24 subnet of an IP address
+// extractIPSubnet returns the /24 subnet of an IP address.
 func (s *IdentificationService) extractIPSubnet(ip string) string {
 	parts := strings.Split(ip, ".")
 	if len(parts) != 4 {
@@ -167,7 +167,7 @@ func (s *IdentificationService) extractIPSubnet(ip string) string {
 	return fmt.Sprintf("%s.%s.%s.0/24", parts[0], parts[1], parts[2])
 }
 
-// detectBot checks for bot/headless browser indicators
+// detectBot checks for bot/headless browser indicators.
 func (s *IdentificationService) detectBot(signals models.Signals) bool {
 	// Check comprehensive bot signals
 	if signals.WebDriver || signals.PhantomPresent ||
@@ -200,12 +200,12 @@ func (s *IdentificationService) detectBot(signals models.Signals) bool {
 	return false
 }
 
-// GetAnalytics retrieves visitor analytics
+// GetAnalytics retrieves visitor analytics.
 func (s *IdentificationService) GetAnalytics(ctx context.Context, days int) ([]models.VisitorAnalytics, error) {
 	return s.repo.GetAnalytics(ctx, days)
 }
 
-// GetRecentIdentifications retrieves recent identifications with pagination
+// GetRecentIdentifications retrieves recent identifications with pagination.
 func (s *IdentificationService) GetRecentIdentifications(ctx context.Context, limit, offset int) ([]models.Identification, error) {
 	return s.repo.GetRecentIdentifications(ctx, limit, offset)
 }

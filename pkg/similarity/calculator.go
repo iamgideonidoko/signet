@@ -11,7 +11,7 @@ import (
 	"github.com/iamgideonidoko/signet/internal/models"
 )
 
-// Weights for different signal categories
+// Weights for different signal categories.
 type Weights struct {
 	Hardware    float64
 	Environment float64
@@ -24,13 +24,13 @@ var DefaultWeights = Weights{
 	Software:    0.2,
 }
 
-// FeatureVector represents a fingerprint as weighted features
+// FeatureVector represents a fingerprint as weighted features.
 type FeatureVector struct {
 	Features map[string]float64
 	Hash     string
 }
 
-// Calculator computes similarity between fingerprints
+// Calculator computes similarity between fingerprints.
 type Calculator struct {
 	weights Weights
 }
@@ -39,7 +39,7 @@ func NewCalculator(weights Weights) *Calculator {
 	return &Calculator{weights: weights}
 }
 
-// ExtractFeatures converts signals into a weighted feature vector
+// ExtractFeatures converts signals into a weighted feature vector.
 func (c *Calculator) ExtractFeatures(signals models.Signals) FeatureVector {
 	features := make(map[string]float64)
 
@@ -92,7 +92,7 @@ func (c *Calculator) ExtractFeatures(signals models.Signals) FeatureVector {
 	}
 }
 
-// ComputeHardwareHash generates a hash from hardware-only signals for Redis caching
+// ComputeHardwareHash generates a hash from hardware-only signals for Redis caching.
 func ComputeHardwareHash(signals models.Signals) string {
 	parts := []string{
 		signals.Canvas2DHash,
@@ -108,7 +108,7 @@ func ComputeHardwareHash(signals models.Signals) string {
 	return hex.EncodeToString(hash[:])
 }
 
-// JaccardSimilarity computes weighted Jaccard similarity between two feature vectors
+// JaccardSimilarity computes weighted Jaccard similarity between two feature vectors.
 func (c *Calculator) JaccardSimilarity(v1, v2 FeatureVector) float64 {
 	if len(v1.Features) == 0 || len(v2.Features) == 0 {
 		return 0.0
@@ -133,12 +133,13 @@ func (c *Calculator) JaccardSimilarity(v1, v2 FeatureVector) float64 {
 		w1, exists1 := v1.Features[key]
 		w2, exists2 := v2.Features[key]
 
-		if exists1 && exists2 {
+		switch {
+		case exists1 && exists2:
 			intersection += math.Min(w1, w2)
 			union += math.Max(w1, w2)
-		} else if exists1 {
+		case exists1:
 			union += w1
-		} else {
+		default:
 			union += w2
 		}
 	}
@@ -150,7 +151,7 @@ func (c *Calculator) JaccardSimilarity(v1, v2 FeatureVector) float64 {
 	return intersection / union
 }
 
-// computeVectorHash creates a deterministic hash of the feature vector
+// computeVectorHash creates a deterministic hash of the feature vector.
 func (c *Calculator) computeVectorHash(features map[string]float64) string {
 	// Sort keys for deterministic hashing
 	keys := make([]string, 0, len(features))
@@ -172,7 +173,7 @@ func (c *Calculator) computeVectorHash(features map[string]float64) string {
 	return hex.EncodeToString(hash[:16]) // Use first 16 bytes
 }
 
-// hashStringSlice creates a consistent hash from a string slice
+// hashStringSlice creates a consistent hash from a string slice.
 func hashStringSlice(items []string) string {
 	if len(items) == 0 {
 		return "empty"
@@ -187,7 +188,7 @@ func hashStringSlice(items []string) string {
 	return hex.EncodeToString(hash[:8])
 }
 
-// extractBrowserVersion extracts browser name and major version from UA
+// extractBrowserVersion extracts browser name and major version from UA.
 func extractBrowserVersion(ua string) string {
 	if ua == "" {
 		return ""

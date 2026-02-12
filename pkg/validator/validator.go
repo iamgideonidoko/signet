@@ -9,8 +9,7 @@ import (
 )
 
 var (
-hashRegex     = regexp.MustCompile(`^[a-fA-F0-9]{8,128}$`)
-timezoneRegex = regexp.MustCompile(`^[A-Za-z]+/[A-Za-z_]+$`)
+	hashRegex = regexp.MustCompile(`^[a-fA-F0-9]{8,128}$`)
 )
 
 type ValidationError struct {

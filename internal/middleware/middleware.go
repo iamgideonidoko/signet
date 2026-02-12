@@ -22,7 +22,7 @@ func NewRateLimiter(cache *cache.Cache, config *config.RateLimitConfig) *RateLim
 	}
 }
 
-// LimitByIP rate limits requests by IP address
+// LimitByIP rate limits requests by IP address.
 func (rl *RateLimiter) LimitByIP() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ip := c.IP()
@@ -51,7 +51,7 @@ func (rl *RateLimiter) LimitByIP() fiber.Handler {
 	}
 }
 
-// LimitByHardwareHash rate limits by hardware fingerprint hash
+// LimitByHardwareHash rate limits by hardware fingerprint hash.
 func (rl *RateLimiter) LimitByHardwareHash() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// This middleware runs after the request body is parsed
@@ -85,7 +85,7 @@ func (rl *RateLimiter) LimitByHardwareHash() fiber.Handler {
 	}
 }
 
-// CORS middleware for cross-origin requests
+// CORS middleware for cross-origin requests.
 func CORS(origins []string) fiber.Handler {
 	allowedOrigins := make(map[string]bool)
 	for _, origin := range origins {
@@ -111,7 +111,7 @@ func CORS(origins []string) fiber.Handler {
 	}
 }
 
-// Logger middleware for request logging
+// Logger middleware for request logging.
 func Logger() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		start := c.Context().Time()
@@ -134,13 +134,13 @@ func Logger() fiber.Handler {
 	}
 }
 
-// Recover middleware for panic recovery
+// Recover middleware for panic recovery.
 func Recover() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		defer func() {
 			if r := recover(); r != nil {
 				fmt.Printf("PANIC: %v\n", r)
-				c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				_ = c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 					"error": "Internal server error",
 				})
 			}
@@ -149,23 +149,7 @@ func Recover() fiber.Handler {
 	}
 }
 
-// extractRealIP extracts the real IP considering trusted proxies
-func extractRealIP(c *fiber.Ctx, trustedProxies []string) string {
-	// Check X-Forwarded-For header if from trusted proxy
-	if len(trustedProxies) > 0 {
-		xff := c.Get("X-Forwarded-For")
-		if xff != "" {
-			ips := strings.Split(xff, ",")
-			if len(ips) > 0 {
-				return strings.TrimSpace(ips[0])
-			}
-		}
-	}
-
-	return c.IP()
-}
-
-// AnonymizeIP removes the last octet for privacy (GDPR compliance)
+// AnonymizeIP removes the last octet for privacy (GDPR compliance).
 func AnonymizeIP(ip string) string {
 	parts := strings.Split(ip, ".")
 	if len(parts) == 4 {

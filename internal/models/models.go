@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Visitor represents a unique browser/device identity
+// Visitor represents a unique browser/device identity.
 type Visitor struct {
 	VisitorID   uuid.UUID `json:"visitor_id" db:"visitor_id"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
@@ -17,7 +17,7 @@ type Visitor struct {
 	VisitCount  int       `json:"visit_count" db:"visit_count"`
 }
 
-// Identification represents a single fingerprint submission
+// Identification represents a single fingerprint submission.
 type Identification struct {
 	RequestID       uuid.UUID `json:"request_id" db:"request_id"`
 	VisitorID       uuid.UUID `json:"visitor_id" db:"visitor_id"`
@@ -82,13 +82,13 @@ type Signals struct {
 	DoNotTrack      string   `json:"do_not_track,omitempty"`
 }
 
-// IdentifyRequest is the incoming fingerprint payload
+// IdentifyRequest is the incoming fingerprint payload.
 type IdentifyRequest struct {
 	Signals   Signals `json:"signals" validate:"required"`
 	IPAddress string  `json:"-"` // Populated from request context
 }
 
-// IdentifyResponse is returned to the client
+// IdentifyResponse is returned to the client.
 type IdentifyResponse struct {
 	VisitorID  uuid.UUID `json:"visitor_id"`
 	Confidence float64   `json:"confidence"`
@@ -96,7 +96,7 @@ type IdentifyResponse struct {
 	RequestID  uuid.UUID `json:"request_id"`
 }
 
-// VisitorAnalytics represents aggregated metrics
+// VisitorAnalytics represents aggregated metrics.
 type VisitorAnalytics struct {
 	Date           string  `json:"date" db:"date"`
 	UniqueVisitors int     `json:"unique_visitors" db:"unique_visitors"`

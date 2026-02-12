@@ -33,7 +33,7 @@ func NewCache(addr, password string, db int, ttl time.Duration) (*Cache, error) 
 	}, nil
 }
 
-// GetVisitorID retrieves a cached visitorID by hardware hash
+// GetVisitorID retrieves a cached visitorID by hardware hash.
 func (c *Cache) GetVisitorID(ctx context.Context, hardwareHash string) (string, error) {
 	key := fmt.Sprintf("hw:%s", hardwareHash)
 	val, err := c.client.Get(ctx, key).Result()
@@ -77,7 +77,7 @@ func (c *Cache) IncrementMetric(ctx context.Context, metric string) error {
 	return c.client.Incr(ctx, key).Err()
 }
 
-// GetMetric retrieves a metric value
+// GetMetric retrieves a metric value.
 func (c *Cache) GetMetric(ctx context.Context, metric string) (int64, error) {
 	key := fmt.Sprintf("metric:%s", metric)
 	val, err := c.client.Get(ctx, key).Result()
@@ -95,7 +95,7 @@ func (c *Cache) GetMetric(ctx context.Context, metric string) (int64, error) {
 	return count, nil
 }
 
-// Close closes the Redis connection
+// Close closes the Redis connection.
 func (c *Cache) Close() error {
 	return c.client.Close()
 }

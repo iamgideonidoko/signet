@@ -70,8 +70,6 @@ func main() {
 		var retryErr error
 		redisCache, retryErr = cache.NewCache(
 			cfg.Redis.URL,
-			cfg.Redis.Password,
-			cfg.Redis.DB,
 			cfg.Redis.CacheTTL,
 		)
 		return retryErr

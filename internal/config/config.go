@@ -31,8 +31,6 @@ type DatabaseConfig struct {
 
 type RedisConfig struct {
 	URL      string
-	Password string
-	DB       int
 	CacheTTL time.Duration
 }
 
@@ -73,9 +71,7 @@ func Load() (*Config, error) {
 			MaxIdleConns: getEnvInt("DB_MAX_IDLE_CONNS", 5),
 		},
 		Redis: RedisConfig{
-			URL:      getEnv("REDIS_URL", "redis://localhost:6379"),
-			Password: getEnv("REDIS_PASSWORD", ""),
-			DB:       getEnvInt("REDIS_DB", 0),
+			URL:      getEnv("REDIS_URL", "redis://localhost:6379/0"),
 			CacheTTL: getEnvDuration("REDIS_CACHE_TTL", 48*time.Hour),
 		},
 		Fingerprint: FingerprintConfig{

@@ -9,7 +9,7 @@ import (
 func TestLoadConfig(t *testing.T) {
 	// Set test environment variables
 	_ = os.Setenv("DATABASE_URL", "postgresql://testuser:testpass@localhost:5432/testdb?sslmode=disable")
-	_ = os.Setenv("REDIS_URL", "redis://localhost:6379")
+	_ = os.Setenv("REDIS_URL", "redis://localhost:6379/0")
 	_ = os.Setenv("API_PORT", "6969")
 
 	cfg, err := Load()
@@ -32,7 +32,7 @@ func TestLoadConfig(t *testing.T) {
 	}
 
 	// Test Redis config
-	if cfg.Redis.URL != "redis://localhost:6379" {
+	if cfg.Redis.URL != "redis://localhost:6379/0" {
 		t.Errorf("Expected REDIS_URL to be set, got %s", cfg.Redis.URL)
 	}
 

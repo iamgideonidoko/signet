@@ -7,7 +7,7 @@ dev:
 	@if command -v air > /dev/null; then \
 		air -c .air.toml; \
 	else \
-		echo "golangci-lint not installed. Install: https://golangci-lint.run/usage/install/"; \
+		echo "air not installed. Install: https://github.com/air-verse/air?tab=readme-ov-file#installation"; \
 	fi
 
 build: build-agent build-api 

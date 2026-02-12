@@ -43,7 +43,7 @@ func main() {
 	err = repository.WithRetry(context.Background(), repository.DefaultRetryConfig, func() error {
 		var retryErr error
 		repo, retryErr = repository.NewRepository(
-			cfg.Database.DSN(),
+			cfg.Database.URL,
 			cfg.Database.MaxConns,
 			cfg.Database.MaxIdleConns,
 		)
@@ -54,8 +54,7 @@ func main() {
 		os.Exit(1)
 	}
 	logger.Info("Connected to PostgreSQL", map[string]any{
-		"host": cfg.Database.Host,
-		"port": cfg.Database.Port,
+		"url": cfg.Database.URL,
 	})
 
 	// Health check database
@@ -70,7 +69,7 @@ func main() {
 	err = repository.WithRetry(context.Background(), repository.DefaultRetryConfig, func() error {
 		var retryErr error
 		redisCache, retryErr = cache.NewCache(
-			cfg.Redis.Address(),
+			cfg.Redis.URL,
 			cfg.Redis.Password,
 			cfg.Redis.DB,
 			cfg.Redis.CacheTTL,
@@ -83,8 +82,7 @@ func main() {
 		os.Exit(1)
 	}
 	logger.Info("Connected to Redis", map[string]any{
-		"host": cfg.Redis.Host,
-		"port": cfg.Redis.Port,
+		"url": cfg.Redis.URL,
 	})
 	
 	// Setup cleanup - only after all resources are successfully initialized

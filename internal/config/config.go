@@ -24,19 +24,13 @@ type APIConfig struct {
 }
 
 type DatabaseConfig struct {
-	Host         string
-	Port         string
-	User         string
-	Password     string
-	Name         string
-	SSLMode      string
+	URL          string
 	MaxConns     int
 	MaxIdleConns int
 }
 
 type RedisConfig struct {
-	Host     string
-	Port     string
+	URL      string
 	Password string
 	DB       int
 	CacheTTL time.Duration
@@ -69,23 +63,17 @@ type MonitoringConfig struct {
 func Load() (*Config, error) {
 	cfg := &Config{
 		API: APIConfig{
-			Port:        getEnv("API_PORT", "8080"),
+			Port:        getEnv("API_PORT", "6969"),
 			Host:        getEnv("API_HOST", "0.0.0.0"),
 			Environment: getEnv("ENVIRONMENT", "development"),
 		},
 		Database: DatabaseConfig{
-			Host:         getEnv("DB_HOST", "localhost"),
-			Port:         getEnv("DB_PORT", "5432"),
-			User:         getEnv("DB_USER", "signet"),
-			Password:     getEnv("DB_PASSWORD", ""),
-			Name:         getEnv("DB_NAME", "signet"),
-			SSLMode:      getEnv("DB_SSL_MODE", "disable"),
+			URL:          getEnv("DATABASE_URL", "postgresql://signet:@localhost:5432/signet?sslmode=disable"),
 			MaxConns:     getEnvInt("DB_MAX_CONNS", 25),
 			MaxIdleConns: getEnvInt("DB_MAX_IDLE_CONNS", 5),
 		},
 		Redis: RedisConfig{
-			Host:     getEnv("REDIS_HOST", "localhost"),
-			Port:     getEnv("REDIS_PORT", "6379"),
+			URL:      getEnv("REDIS_URL", "redis://localhost:6379"),
 			Password: getEnv("REDIS_PASSWORD", ""),
 			DB:       getEnvInt("REDIS_DB", 0),
 			CacheTTL: getEnvDuration("REDIS_CACHE_TTL", 48*time.Hour),
@@ -120,24 +108,13 @@ func Load() (*Config, error) {
 }
 
 func (c *Config) Validate() error {
-	if c.Database.Password == "" {
-		return fmt.Errorf("DB_PASSWORD is required")
+	if c.Database.URL == "" {
+		return fmt.Errorf("DATABASE_URL is required")
 	}
 	if c.Fingerprint.SimilarityThreshold < 0 || c.Fingerprint.SimilarityThreshold > 1 {
 		return fmt.Errorf("SIMILARITY_THRESHOLD must be between 0 and 1")
 	}
 	return nil
-}
-
-func (c *DatabaseConfig) DSN() string {
-	return fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		c.Host, c.Port, c.User, c.Password, c.Name, c.SSLMode,
-	)
-}
-
-func (c *RedisConfig) Address() string {
-	return fmt.Sprintf("%s:%s", c.Host, c.Port)
 }
 
 func getEnv(key, defaultValue string) string {

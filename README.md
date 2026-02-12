@@ -6,12 +6,12 @@ HiFi Browser Fingerprinting with probabilistic matching that just works. Signet 
 
 ```bash
 git clone https://github.com/iamgideonidoko/signet.git && cd signet
-cp .env.example .env  # Edit: set DB_PASSWORD
+cp .env.example .env  # Edit: set DATABASE_URL with your password
 make docker-up && make migrate
-curl http://localhost:8080/health
+curl http://localhost:6969/health
 ```
 
-Dashboard: http://localhost:8080/dashboard
+Dashboard: http://localhost:6969/dashboard
 
 ## How It Works
 
@@ -98,7 +98,7 @@ make dev          # Start dev mode
 ## Production Deployment
 
 ```bash
-cp .env.example .env  # Set DB_PASSWORD, CORS_ORIGINS
+cp .env.example .env  # Set DATABASE_URL, REDIS_URL, CORS_ORIGINS
 make build-agent && make docker-up && make migrate
 ```
 

@@ -13,12 +13,19 @@ type Cache struct {
 	ttl    time.Duration
 }
 
-func NewCache(addr, password string, db int, ttl time.Duration) (*Cache, error) {
-	client := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       db,
-	})
+func NewCache(url, password string, db int, ttl time.Duration) (*Cache, error) {
+	opts, err := redis.ParseURL(url)
+	if err != nil {
+		return nil, fmt.Errorf("invalid Redis URL: %w", err)
+	}
+	
+	// Override with provided values if specified
+	if password != "" {
+		opts.Password = password
+	}
+	opts.DB = db
+	
+	client := redis.NewClient(opts)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

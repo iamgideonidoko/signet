@@ -6,7 +6,7 @@ HiFi Browser Fingerprinting with probabilistic matching that just works. Signet 
 
 ```bash
 git clone https://github.com/iamgideonidoko/signet.git && cd signet
-cp .env.example .env  # Edit: set DATABASE_URL with your password
+cp .env.example .env
 make docker-up && make migrate
 curl http://localhost:6969/health
 ```
@@ -88,21 +88,12 @@ POST /v1/identify
 make install-deps  # Install dependencies
 make build        # Build API + Agent
 make test         # Run tests
-make dev          # Start dev mode
+make dev          # Start dev mode (requires air)
 ```
 
 ## Contributing
 
 **Priority areas:** Fingerprinting techniques, performance optimization, security audits, ML similarity scoring.
-
-## Production Deployment
-
-```bash
-cp .env.example .env  # Set DATABASE_URL, REDIS_URL, CORS_ORIGINS
-make build-agent && make docker-up && make migrate
-```
-
-**Options:** Docker Compose (recommended) | Kubernetes | AWS ECS | Cloud Run | Bare Metal
 
 ## Roadmap
 

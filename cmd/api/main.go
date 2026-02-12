@@ -84,7 +84,7 @@ func main() {
 	logger.Info("Connected to Redis", map[string]any{
 		"url": cfg.Redis.URL,
 	})
-	
+
 	// Setup cleanup - only after all resources are successfully initialized
 	defer func() {
 		if err := repo.Close(); err != nil {

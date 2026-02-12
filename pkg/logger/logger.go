@@ -106,7 +106,7 @@ func (l *Logger) log(level Level, msg string, fields map[string]any) {
 		l.mu.Unlock() // Explicitly unlock before exit
 		os.Exit(1)
 	}
-	
+
 	l.mu.Unlock()
 }
 

@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  signet-db:
+    image: postgres:15-alpine
+    container_name: signet-db
+    environment:
+      POSTGRES_USER: signet
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-signet_password}
+      POSTGRES_DB: signet
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U signet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  signet-cache:
+    image: redis:7-alpine
+    container_name: signet-cache
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  signet-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: signet-api
+    environment:
+      API_PORT: 8080
+      API_HOST: 0.0.0.0
+      ENVIRONMENT: production
+
+      DB_HOST: signet-db
+      DB_PORT: 5432
+      DB_USER: signet
+      DB_PASSWORD: ${DB_PASSWORD:-signet_password}
+      DB_NAME: signet
+      DB_SSL_MODE: disable
+      DB_MAX_CONNS: 25
+      DB_MAX_IDLE_CONNS: 5
+
+      REDIS_HOST: signet-cache
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      REDIS_DB: 0
+      REDIS_CACHE_TTL: 48h
+
+      SIMILARITY_THRESHOLD: 0.75
+      HARDWARE_WEIGHT: 0.8
+      ENVIRONMENT_WEIGHT: 0.5
+      SOFTWARE_WEIGHT: 0.2
+
+      RATE_LIMIT_REQUESTS: 1000
+      RATE_LIMIT_WINDOW: 1m
+      RATE_LIMIT_BY_HARDWARE: 2000
+      RATE_LIMIT_HARDWARE_WINDOW: 1h
+
+      CORS_ORIGINS: "*"
+      ENABLE_METRICS: "true"
+      LOG_LEVEL: info
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./agent/dist:/app/agent/dist:ro
+    depends_on:
+      signet-db:
+        condition: service_healthy
+      signet-cache:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

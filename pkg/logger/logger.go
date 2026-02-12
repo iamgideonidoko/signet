@@ -1,65 +1,165 @@
 package logger
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"maps"
 	"os"
-
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
+	"runtime"
+	"sync"
+	"time"
 )
 
-var log *zap.Logger
+type Level int
 
-func Init(environment string) error {
-	var config zap.Config
+const (
+	DEBUG Level = iota
+	INFO
+	WARN
+	ERROR
+	FATAL
+)
 
-	if environment == "production" {
-		config = zap.NewProductionConfig()
-		config.EncoderConfig.TimeKey = "timestamp"
-		config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	} else {
-		config = zap.NewDevelopmentConfig()
-		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+var levelNames = map[Level]string{
+	DEBUG: "DEBUG",
+	INFO:  "INFO",
+	WARN:  "WARN",
+	ERROR: "ERROR",
+	FATAL: "FATAL",
+}
+
+type Logger struct {
+	level  Level
+	out    io.Writer
+	mu     sync.Mutex
+	fields map[string]any
+}
+
+type LogEntry struct {
+	Timestamp string         `json:"timestamp"`
+	Level     string         `json:"level"`
+	Message   string         `json:"message"`
+	Fields    map[string]any `json:"fields,omitempty"`
+	Caller    string         `json:"caller,omitempty"`
+}
+
+var std *Logger
+
+func init() {
+	std = New(INFO, os.Stdout)
+}
+
+func New(level Level, out io.Writer) *Logger {
+	return &Logger{
+		level:  level,
+		out:    out,
+		fields: make(map[string]any),
+	}
+}
+
+func SetLevel(level Level) {
+	std.mu.Lock()
+	defer std.mu.Unlock()
+	std.level = level
+}
+
+func (l *Logger) WithField(key string, value any) *Logger {
+	newLogger := &Logger{
+		level:  l.level,
+		out:    l.out,
+		fields: make(map[string]any),
+	}
+	maps.Copy(newLogger.fields, l.fields)
+	newLogger.fields[key] = value
+	return newLogger
+}
+
+func (l *Logger) log(level Level, msg string, fields map[string]any) {
+	if level < l.level {
+		return
 	}
 
-	var err error
-	log, err = config.Build(zap.AddCallerSkip(1))
-	if err != nil {
-		return err
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	entry := LogEntry{
+		Timestamp: time.Now().UTC().Format(time.RFC3339Nano),
+		Level:     levelNames[level],
+		Message:   msg,
+		Fields:    make(map[string]any),
 	}
 
-	return nil
-}
+	maps.Copy(entry.Fields, l.fields)
+	maps.Copy(entry.Fields, fields)
 
-func Get() *zap.Logger {
-	if log == nil {
-		log, _ = zap.NewDevelopment()
+	if level >= ERROR {
+		_, file, line, ok := runtime.Caller(2)
+		if ok {
+			entry.Caller = fmt.Sprintf("%s:%d", file, line)
+		}
 	}
-	return log
+
+	data, _ := json.Marshal(entry)
+	fmt.Fprintf(l.out, "%s\n", data)
+
+	if level == FATAL {
+		os.Exit(1)
+	}
 }
 
-func Info(msg string, fields ...zap.Field) {
-	Get().Info(msg, fields...)
+func (l *Logger) Info(msg string, fields ...map[string]any) {
+	f := mergeFields(fields...)
+	l.log(INFO, msg, f)
 }
 
-func Warn(msg string, fields ...zap.Field) {
-	Get().Warn(msg, fields...)
+func (l *Logger) Warn(msg string, fields ...map[string]any) {
+	f := mergeFields(fields...)
+	l.log(WARN, msg, f)
 }
 
-func Debug(msg string, fields ...zap.Field) {
-	Get().Debug(msg, fields...)
+func (l *Logger) Error(msg string, fields ...map[string]any) {
+	f := mergeFields(fields...)
+	l.log(ERROR, msg, f)
 }
 
-func Error(msg string, fields ...zap.Field) {
-	Get().Error(msg, fields...)
+func Info(msg string, fields ...map[string]any) {
+	std.Info(msg, fields...)
 }
 
-func Fatal(msg string, fields ...zap.Field) {
-	Get().Fatal(msg, fields...)
-	os.Exit(1)
+func Warn(msg string, fields ...map[string]any) {
+	std.Warn(msg, fields...)
 }
 
-func Sync() {
-	if log != nil {
-		_ = log.Sync()
+func Error(msg string, fields ...map[string]any) {
+	std.Error(msg, fields...)
+}
+
+func WithField(key string, value any) *Logger {
+	return std.WithField(key, value)
+}
+
+func mergeFields(fields ...map[string]any) map[string]any {
+	result := make(map[string]any)
+	for _, f := range fields {
+		maps.Copy(result, f)
+	}
+	return result
+}
+
+func ParseLevel(level string) Level {
+	switch level {
+	case "debug":
+		return DEBUG
+	case "info":
+		return INFO
+	case "warn":
+		return WARN
+	case "error":
+		return ERROR
+	case "fatal":
+		return FATAL
+	default:
+		return INFO
 	}
 }

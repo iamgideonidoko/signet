@@ -1,5 +1,35 @@
 package models
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+// Visitor represents a unique browser/device identity
+type Visitor struct {
+	VisitorID   uuid.UUID `json:"visitor_id" db:"visitor_id"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+	TrustScore  float64   `json:"trust_score" db:"trust_score"`
+	FirstSeenIP *string   `json:"first_seen_ip,omitempty" db:"first_seen_ip"`
+	LastSeenIP  *string   `json:"last_seen_ip,omitempty" db:"last_seen_ip"`
+	VisitCount  int       `json:"visit_count" db:"visit_count"`
+}
+
+// Identification represents a single fingerprint submission
+type Identification struct {
+	RequestID       uuid.UUID `json:"request_id" db:"request_id"`
+	VisitorID       uuid.UUID `json:"visitor_id" db:"visitor_id"`
+	IPAddress       string    `json:"ip_address" db:"ip_address"`
+	UserAgent       *string   `json:"user_agent,omitempty" db:"user_agent"`
+	Signals         Signals   `json:"signals" db:"signals"`
+	ConfidenceScore float64   `json:"confidence_score" db:"confidence_score"`
+	CreatedAt       time.Time `json:"created_at" db:"created_at"`
+	HardwareHash    string    `json:"hardware_hash" db:"hardware_hash"`
+	IsBot           bool      `json:"is_bot" db:"is_bot"`
+}
+
 type Signals struct {
 	// gpu /rendering
 	Canvas2DHash    string         `json:"canvas_2d_hash"`
@@ -50,4 +80,27 @@ type Signals struct {
 	BatteryPresent  bool     `json:"battery_present"`
 	PermissionsHash string   `json:"permissions_hash"`
 	DoNotTrack      string   `json:"do_not_track,omitempty"`
+}
+
+// IdentifyRequest is the incoming fingerprint payload
+type IdentifyRequest struct {
+	Signals   Signals `json:"signals" validate:"required"`
+	IPAddress string  `json:"-"` // Populated from request context
+}
+
+// IdentifyResponse is returned to the client
+type IdentifyResponse struct {
+	VisitorID  uuid.UUID `json:"visitor_id"`
+	Confidence float64   `json:"confidence"`
+	IsNew      bool      `json:"is_new"`
+	RequestID  uuid.UUID `json:"request_id"`
+}
+
+// VisitorAnalytics represents aggregated metrics
+type VisitorAnalytics struct {
+	Date           string  `json:"date" db:"date"`
+	UniqueVisitors int     `json:"unique_visitors" db:"unique_visitors"`
+	TotalRequests  int     `json:"total_requests" db:"total_requests"`
+	AvgConfidence  float64 `json:"avg_confidence" db:"avg_confidence"`
+	BotRequests    int     `json:"bot_requests" db:"bot_requests"`
 }

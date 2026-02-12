@@ -47,10 +47,10 @@ docker-build:
 	@docker-compose build
 
 migrate:
-	@docker-compose exec signet-db psql -U signet -d signet -f /docker-entrypoint-initdb.d/001_create_initial_schema.up.sql
+	@docker-compose exec signet-db psql -U signet -d signet_db -f /docker-entrypoint-initdb.d/001_create_initial_schema.up.sql
 
 migrate-down: 
-	@docker-compose exec signet-db psql -U signet -d signet -f /docker-entrypoint-initdb.d/001_create_initial_schema.down.sql
+	@docker-compose exec signet-db psql -U signet -d signet_db -f /docker-entrypoint-initdb.d/001_create_initial_schema.down.sql
 
 logs:
 	@docker-compose logs -f signet-api
@@ -68,7 +68,7 @@ clean:
 	@rm -f coverage.out coverage.html
 
 psql: 
-	@docker-compose exec signet-db psql -U signet -d signet
+	@docker-compose exec signet-db psql -U signet -d signet_db
 
 redis-cli:
 	@docker-compose exec signet-cache redis-cli

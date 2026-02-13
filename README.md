@@ -103,11 +103,11 @@ make dev          # Start dev mode (requires air)
 
 ## License
 
-MIT - See [LICENSE](LICENSE)
+[MIT](LICENSE)
 
 ## Support
 
-[Issues](https://github.com/iamgideonidoko/signet/issues) | [Discussions](https://github.com/iamgideonidoko/signet/discussions) | [Docs](GETTING_STARTED.md)
+[Issues](https://github.com/iamgideonidoko/signet/issues)
 
 Reference papers:
 

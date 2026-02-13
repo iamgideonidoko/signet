@@ -43,8 +43,10 @@ docker-up:
 docker-up-infra:
 	@docker-compose up -d signet-db signet-cache
 
+# usage: make docker-down s="signet-api"
+s ?= 
 docker-down:
-	@docker-compose down
+	docker-compose down $(s)
 
 docker-build:
 	@docker-compose build

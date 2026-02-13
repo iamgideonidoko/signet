@@ -36,7 +36,6 @@ func (rl *RateLimiter) LimitByIP() fiber.Handler {
 		)
 
 		if err != nil {
-			// Log error but don't block on cache failure
 			return c.Next()
 		}
 
@@ -54,8 +53,6 @@ func (rl *RateLimiter) LimitByIP() fiber.Handler {
 // LimitByHardwareHash rate limits by hardware fingerprint hash.
 func (rl *RateLimiter) LimitByHardwareHash() fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// This middleware runs after the request body is parsed
-		// We'll extract the hardware hash from the context if set by the handler
 		hardwareHash := c.Locals("hardware_hash")
 		if hardwareHash == nil {
 			return c.Next()
@@ -85,7 +82,6 @@ func (rl *RateLimiter) LimitByHardwareHash() fiber.Handler {
 	}
 }
 
-// CORS middleware for cross-origin requests.
 func CORS(origins []string) fiber.Handler {
 	allowedOrigins := make(map[string]bool)
 	for _, origin := range origins {
@@ -95,7 +91,6 @@ func CORS(origins []string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		origin := c.Get("Origin")
 
-		// Allow all origins if "*" is configured
 		if allowedOrigins["*"] || allowedOrigins[origin] {
 			c.Set("Access-Control-Allow-Origin", origin)
 			c.Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -111,30 +106,21 @@ func CORS(origins []string) fiber.Handler {
 	}
 }
 
-// Logger middleware for request logging.
 func Logger() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		start := c.Context().Time()
-
 		err := c.Next()
-
 		duration := c.Context().Time().Sub(start)
-
-		status := c.Response().StatusCode()
-		method := c.Method()
-		path := c.Path()
-		ip := c.IP()
 
 		fmt.Printf("[%s] %s %s - %d (%v) - IP: %s\n",
 			start.Format("2006-01-02 15:04:05"),
-			method, path, status, duration, ip,
+			c.Method(), c.Path(), c.Response().StatusCode(), duration, c.IP(),
 		)
 
 		return err
 	}
 }
 
-// Recover middleware for panic recovery.
 func Recover() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		defer func() {
@@ -149,15 +135,11 @@ func Recover() fiber.Handler {
 	}
 }
 
-// AnonymizeIP removes the last octet for privacy (GDPR compliance).
+// AnonymizeIP removes the last octet for GDPR compliance.
 func AnonymizeIP(ip string) string {
 	parts := strings.Split(ip, ".")
 	if len(parts) == 4 {
-		// IPv4: zero out last octet
 		return fmt.Sprintf("%s.%s.%s.0", parts[0], parts[1], parts[2])
 	}
-
-	// For IPv6 or invalid format, return as-is
-	// In production, you'd want proper IPv6 anonymization
 	return ip
 }

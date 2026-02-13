@@ -43,7 +43,6 @@ func NewCalculator(weights Weights) *Calculator {
 func (c *Calculator) ExtractFeatures(signals models.Signals) FeatureVector {
 	features := make(map[string]float64)
 
-	// Hardware features (weight: 0.8)
 	if signals.Canvas2DHash != "" {
 		features["canvas:"+signals.Canvas2DHash] = c.weights.Hardware
 	}
@@ -52,7 +51,6 @@ func (c *Calculator) ExtractFeatures(signals models.Signals) FeatureVector {
 	}
 	features[fmt.Sprintf("webgl:%s:%s", signals.WebGLVendor, signals.WebGLRenderer)] = c.weights.Hardware
 
-	// WebGL extensions (sorted for consistency)
 	extHash := hashStringSlice(signals.WebGLExtensions)
 	features["webgl_ext:"+extHash] = c.weights.Hardware * 0.7
 
@@ -60,7 +58,6 @@ func (c *Calculator) ExtractFeatures(signals models.Signals) FeatureVector {
 	features[fmt.Sprintf("device_memory:%.0f", signals.DeviceMemory)] = c.weights.Hardware * 0.6
 	features[fmt.Sprintf("color_depth:%d", signals.ColorDepth)] = c.weights.Hardware * 0.5
 
-	// Environment features (weight: 0.5)
 	if signals.TimeZone != "" {
 		features["tz:"+signals.TimeZone] = c.weights.Environment
 	}
@@ -72,18 +69,15 @@ func (c *Calculator) ExtractFeatures(signals models.Signals) FeatureVector {
 
 	features[fmt.Sprintf("screen:%dx%d", signals.ScreenWidth, signals.ScreenHeight)] = c.weights.Environment * 0.7
 
-	// Software features (weight: 0.2) - most volatile
 	if signals.Platform != "" {
 		features["platform:"+signals.Platform] = c.weights.Software
 	}
 
-	// Extract browser/version from UA (ignore patch versions)
 	browserVersion := extractBrowserVersion(signals.UserAgent)
 	if browserVersion != "" {
 		features["browser:"+browserVersion] = c.weights.Software
 	}
 
-	// Generate overall hash for quick lookups
 	hash := c.computeVectorHash(features)
 
 	return FeatureVector{
@@ -114,7 +108,6 @@ func (c *Calculator) JaccardSimilarity(v1, v2 FeatureVector) float64 {
 		return 0.0
 	}
 
-	// Quick check: if hardware hashes match exactly, return high similarity
 	if v1.Hash == v2.Hash {
 		return 1.0
 	}
@@ -151,9 +144,7 @@ func (c *Calculator) JaccardSimilarity(v1, v2 FeatureVector) float64 {
 	return intersection / union
 }
 
-// computeVectorHash creates a deterministic hash of the feature vector.
 func (c *Calculator) computeVectorHash(features map[string]float64) string {
-	// Sort keys for deterministic hashing
 	keys := make([]string, 0, len(features))
 	for k := range features {
 		keys = append(keys, k)
@@ -162,7 +153,6 @@ func (c *Calculator) computeVectorHash(features map[string]float64) string {
 
 	var parts []string
 	for _, k := range keys {
-		// Only include high-weight features in the hash
 		if features[k] >= c.weights.Environment {
 			parts = append(parts, fmt.Sprintf("%s:%.2f", k, features[k]))
 		}
@@ -170,10 +160,9 @@ func (c *Calculator) computeVectorHash(features map[string]float64) string {
 
 	combined := strings.Join(parts, "|")
 	hash := sha256.Sum256([]byte(combined))
-	return hex.EncodeToString(hash[:16]) // Use first 16 bytes
+	return hex.EncodeToString(hash[:16])
 }
 
-// hashStringSlice creates a consistent hash from a string slice.
 func hashStringSlice(items []string) string {
 	if len(items) == 0 {
 		return "empty"
@@ -200,7 +189,6 @@ func extractBrowserVersion(ua string) string {
 	browsers := []string{"chrome", "firefox", "safari", "edge", "opera"}
 	for _, browser := range browsers {
 		if idx := strings.Index(ua, browser); idx != -1 {
-			// Extract major version only
 			parts := strings.Split(ua[idx:], "/")
 			if len(parts) > 1 {
 				version := strings.Split(parts[1], ".")[0]

@@ -21,24 +21,20 @@ import (
 )
 
 func main() {
-	// Load environment variables
 	_ = godotenv.Load()
 
-	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		logger.Error("Failed to load config", map[string]any{"error": err.Error()})
 		os.Exit(1)
 	}
 
-	// Set log level
 	logger.SetLevel(logger.ParseLevel(cfg.Monitoring.LogLevel))
 	logger.Info("Starting Signet API", map[string]any{
-		"version":     "1.0.0",
+		"version":     "0.0.1",
 		"environment": cfg.API.Environment,
 	})
 
-	// Initialize database with retry logic
 	var repo *repository.Repository
 	err = repository.WithRetry(context.Background(), repository.DefaultRetryConfig, func() error {
 		var retryErr error
@@ -57,14 +53,12 @@ func main() {
 		"url": cfg.Database.URL,
 	})
 
-	// Health check database
 	if err := repo.HealthCheck(context.Background()); err != nil {
 		logger.Error("Database health check failed", map[string]any{"error": err.Error()})
 		_ = repo.Close()
 		os.Exit(1)
 	}
 
-	// Initialize Redis cache
 	var redisCache *cache.Cache
 	err = repository.WithRetry(context.Background(), repository.DefaultRetryConfig, func() error {
 		var retryErr error
@@ -83,7 +77,7 @@ func main() {
 		"url": cfg.Redis.URL,
 	})
 
-	// Setup cleanup - only after all resources are successfully initialized
+	// Deferred cleanup only runs after successful initialization
 	defer func() {
 		if err := repo.Close(); err != nil {
 			logger.Error("Failed to close database connection", map[string]any{"error": err.Error()})
@@ -95,14 +89,11 @@ func main() {
 		}
 	}()
 
-	// Initialize services
 	identService := services.NewIdentificationService(repo, redisCache, &cfg.Fingerprint)
 	logger.Info("Initialized identification service")
 
-	// Initialize handlers
 	handler := handlers.NewHandler(identService, redisCache)
 
-	// Create Fiber app
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: false,
 		ServerHeader:          "Signet",
@@ -123,35 +114,28 @@ func main() {
 		},
 	})
 
-	// Global middleware
 	app.Use(middleware.Recover())
 	app.Use(middleware.Logger())
 	app.Use(middleware.CORS(cfg.Security.CORSOrigins))
 
-	// Rate limiters
 	rateLimiter := middleware.NewRateLimiter(redisCache, &cfg.RateLimit)
 
-	// Routes
 	app.Get("/health", handler.Health)
 	app.Get("/metrics", handler.Metrics)
 	app.Get("/dashboard", handler.Dashboard)
 
-	// API v1 routes
 	v1 := app.Group("/v1")
 	v1.Post("/identify",
 		rateLimiter.LimitByIP(),
 		handler.Identify,
 	)
 
-	// Analytics API
 	api := app.Group("/api")
 	api.Get("/analytics", handler.Analytics)
 	api.Get("/identifications", handler.RecentIdentifications)
 
-	// Serve the agent script
 	app.Static("/agent.js", "./agent/dist/agent.min.js")
 
-	// Graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
@@ -167,7 +151,6 @@ func main() {
 		os.Exit(0)
 	}()
 
-	// Start server
 	addr := fmt.Sprintf("%s:%s", cfg.API.Host, cfg.API.Port)
 	logger.Info("Signet API started", map[string]any{
 		"address":   addr,

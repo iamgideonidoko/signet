@@ -40,6 +40,9 @@ lint:
 docker-up:
 	@docker-compose up -d
 
+docker-up-infra:
+	@docker-compose up -d signet-db signet-cache
+
 docker-down:
 	@docker-compose down
 

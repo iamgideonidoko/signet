@@ -1,0 +1,18 @@
+# Build output
+dist
+*.cjs
+*.mjs
+*.d.ts
+*.d.cts
+*.d.mts
+
+# Dependencies
+node_modules
+pnpm-lock.yaml
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log

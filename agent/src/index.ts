@@ -121,7 +121,9 @@ class SignetAgent {
       canvas.height = 60;
       const ctx = canvas.getContext("2d");
 
-      if (!ctx) return "no_context";
+      if (!ctx) {
+        return "no_context";
+      }
 
       // Background gradient
       const gradient = ctx.createLinearGradient(0, 0, 280, 60);
@@ -166,7 +168,9 @@ class SignetAgent {
     try {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      if (!ctx) return false;
+      if (!ctx) {
+        return false;
+      }
 
       ctx.rect(0, 0, 10, 10);
       ctx.rect(2, 2, 6, 6);
@@ -281,7 +285,7 @@ class SignetAgent {
       );
       gl.compileShader(fragmentShader);
 
-      const program = gl.createProgram()!;
+      const program = gl.createProgram();
       gl.attachShader(program, vertexShader);
       gl.attachShader(program, fragmentShader);
       gl.linkProgram(program);
@@ -316,7 +320,9 @@ class SignetAgent {
     try {
       const AudioContext =
         (window as any).AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return "no_audio_context";
+      if (!AudioContext) {
+        return "no_audio_context";
+      }
 
       const context = new AudioContext();
       const params: string[] = [
@@ -336,7 +342,9 @@ class SignetAgent {
     try {
       const AudioContext =
         (window as any).AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return "no_audio_context";
+      if (!AudioContext) {
+        return "no_audio_context";
+      }
 
       const context = new AudioContext();
       const oscillator = context.createOscillator();
@@ -495,7 +503,9 @@ class SignetAgent {
    */
   private async getMediaDevices(): Promise<number> {
     try {
-      if (!navigator.mediaDevices?.enumerateDevices) return 0;
+      if (!navigator.mediaDevices?.enumerateDevices) {
+        return 0;
+      }
       const devices = await navigator.mediaDevices.enumerateDevices();
       return devices.length;
     } catch {
@@ -508,7 +518,9 @@ class SignetAgent {
    */
   private async checkBattery(): Promise<boolean> {
     try {
-      if (!(navigator as any).getBattery) return false;
+      if (!(navigator as any).getBattery) {
+        return false;
+      }
       await (navigator as any).getBattery();
       return true;
     } catch {
@@ -545,9 +557,15 @@ class SignetAgent {
   }
 
   private getColorGamut(): string {
-    if (window.matchMedia("(color-gamut: p3)").matches) return "p3";
-    if (window.matchMedia("(color-gamut: srgb)").matches) return "srgb";
-    if (window.matchMedia("(color-gamut: rec2020)").matches) return "rec2020";
+    if (window.matchMedia("(color-gamut: p3)").matches) {
+      return "p3";
+    }
+    if (window.matchMedia("(color-gamut: srgb)").matches) {
+      return "srgb";
+    }
+    if (window.matchMedia("(color-gamut: rec2020)").matches) {
+      return "rec2020";
+    }
     return "unknown";
   }
 

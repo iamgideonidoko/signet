@@ -12,9 +12,12 @@
     /* pnpm compatibility */
     "preserveSymlinks": true,
 
-    /* Modern Library Standards */
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    /* Modern Library Standards - bundler mode for tsdown */
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    /* Browser APIs */
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

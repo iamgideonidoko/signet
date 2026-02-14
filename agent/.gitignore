@@ -1,0 +1,11 @@
+dist/
+*.tsbuildinfo
+
+node_modules/
+.pnpm-debug.log*
+
+.DS_Store
+*.log
+
+coverage/
+.nyc_output/

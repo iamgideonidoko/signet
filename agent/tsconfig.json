@@ -1,0 +1,21 @@
+{
+  "extends": "@tsconfig/node20/tsconfig.json",
+  "compilerOptions": {
+    /* Required for tsdown/rolldown speed */
+    "isolatedModules": true,
+
+    /* Ensure types are generated in the right spot */
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true,
+
+    /* pnpm compatibility */
+    "preserveSymlinks": true,
+
+    /* Modern Library Standards */
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}

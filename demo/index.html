@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signet Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg-primary: #000000;
+        --bg-secondary: #0a0a0a;
+        --bg-tertiary: #111111;
+        --border-primary: #1a1a1a;
+        --border-secondary: #2a2a2a;
+        --text-primary: #ffffff;
+        --text-secondary: #a1a1a1;
+        --text-tertiary: #666666;
+        --accent: #ffffff;
+        --shadow: rgba(255, 255, 255, 0.05);
+      }
+
+      @keyframes gradientShift {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: -1000px 0;
+        }
+        100% {
+          background-position: 1000px 0;
+        }
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter",
+          sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.03) 1px,
+          transparent 1px
+        );
+        background-size: 50px 50px;
+        animation: gradientShift 20s ease infinite;
+        pointer-events: none;
+      }
+
+      .container {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-primary);
+        border-radius: 12px;
+        padding: 3rem 2.5rem;
+        max-width: 600px;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+        backdrop-filter: blur(10px);
+        animation: fadeInUp 0.6s ease-out;
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.02),
+          0 20px 80px rgba(0, 0, 0, 0.5);
+      }
+
+      .container::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        padding: 1px;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+
+      h1 {
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        font-size: 2.25rem;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1.2;
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 2.5rem;
+        font-size: 0.9375rem;
+        line-height: 1.6;
+        font-weight: 400;
+      }
+
+      button {
+        background: var(--text-primary);
+        color: var(--bg-primary);
+        border: none;
+        padding: 0.875rem 1.5rem;
+        border-radius: 6px;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        letter-spacing: -0.01em;
+      }
+
+      button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      button:hover::before {
+        left: 100%;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      button:disabled:hover {
+        box-shadow: none;
+      }
+
+      .result {
+        margin-top: 2rem;
+        padding: 0;
+        display: none;
+        animation: fadeInUp 0.4s ease-out;
+      }
+
+      .result.show {
+        display: block;
+      }
+
+      .result-item {
+        padding: 1.25rem;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-primary);
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        transition: all 0.2s ease;
+      }
+
+      .result-item:hover {
+        border-color: var(--border-secondary);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .result-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .result-label {
+        font-weight: 500;
+        color: var(--text-tertiary);
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .result-value {
+        font-family:
+          "SF Mono", "Monaco", "Inconsolata", "Fira Code", "Courier New",
+          monospace;
+        color: var(--text-primary);
+        font-size: 0.9375rem;
+        word-break: break-all;
+        line-height: 1.5;
+        font-weight: 400;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.875rem;
+        border-radius: 6px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        border: 1px solid;
+      }
+
+      .badge-new {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .badge-returning {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-secondary);
+        border-color: var(--border-secondary);
+      }
+
+      .confidence {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .confidence-high {
+        color: var(--text-primary);
+      }
+
+      .confidence-medium {
+        color: #e5e5e5;
+      }
+
+      .confidence-low {
+        color: var(--text-secondary);
+      }
+
+      .error {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 100, 100, 0.3);
+        color: #ff6b6b;
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        animation: fadeInUp 0.3s ease-out;
+      }
+
+      .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        border-radius: 50%;
+        border-top-color: var(--bg-primary);
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+
+      @media (max-width: 640px) {
+        .container {
+          padding: 2rem 1.5rem;
+        }
+
+        h1 {
+          font-size: 1.875rem;
+        }
+
+        .metric-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Signet</h1>
+      <p class="subtitle">
+        HiFi Browser Fingerprinting with probabilistic matching that just works.
+      </p>
+
+      <button id="identifyBtn" onclick="identify()">
+        Identify This Browser
+      </button>
+
+      <div id="result" class="result">
+        <div class="metric-grid">
+          <div class="result-item">
+            <span class="result-label">Confidence Score</span>
+            <span class="confidence" id="confidence">-</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Status</span>
+            <span id="status">-</span>
+          </div>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Visitor ID</span>
+          <span class="result-value" id="visitorId">-</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Request ID</span>
+          <span class="result-value" id="requestId">-</span>
+        </div>
+      </div>
+
+      <div id="error" class="error" style="display: none"></div>
+    </div>
+
+    <!-- Load the Signet agent -->
+    <script src="http://localhost:6969/agent.js"></script>
+
+    <script>
+      async function identify() {
+        const btn = document.getElementById("identifyBtn");
+        const result = document.getElementById("result");
+        const error = document.getElementById("error");
+
+        // Reset UI
+        result.classList.remove("show");
+        error.style.display = "none";
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading"></span> Identifying...';
+
+        try {
+          const startTime = performance.now();
+
+          // Call Signet agent
+          const response = await Signet.identify(
+            "http://localhost:6969/v1/identify",
+          );
+
+          const elapsed = (performance.now() - startTime).toFixed(2);
+          console.log(`Identification completed in ${elapsed}ms`);
+
+          // Display results
+          document.getElementById("visitorId").textContent =
+            response.visitor_id;
+          document.getElementById("requestId").textContent =
+            response.request_id;
+
+          const confidencePercent = (response.confidence * 100).toFixed(1);
+          const confidenceEl = document.getElementById("confidence");
+          confidenceEl.textContent = `${confidencePercent}%`;
+
+          // Color-code confidence
+          confidenceEl.className = "confidence";
+          if (response.confidence >= 0.9) {
+            confidenceEl.classList.add("confidence-high");
+          } else if (response.confidence >= 0.7) {
+            confidenceEl.classList.add("confidence-medium");
+          } else {
+            confidenceEl.classList.add("confidence-low");
+          }
+
+          // Status badge
+          const statusEl = document.getElementById("status");
+          if (response.is_new) {
+            statusEl.innerHTML =
+              '<span class="badge badge-new">NEW VISITOR</span>';
+          } else {
+            statusEl.innerHTML =
+              '<span class="badge badge-returning">RETURNING VISITOR</span>';
+          }
+
+          result.classList.add("show");
+        } catch (err) {
+          error.textContent = `Error: ${err.message}`;
+          error.style.display = "block";
+          console.error("Identification error:", err);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Identify Again";
+        }
+      }
+
+      // Auto-identify on load (optional)
+      // window.addEventListener('load', identify);
+    </script>
+  </body>
+</html>

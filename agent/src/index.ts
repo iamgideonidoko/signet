@@ -265,7 +265,10 @@ class SignetAgent {
    */
   private renderWebGLScene(gl: WebGLRenderingContext): string {
     try {
-      const vertexShader = gl.createShader(gl.VERTEX_SHADER)!;
+      const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+      if (!vertexShader) {
+        return "";
+      }
       gl.shaderSource(
         vertexShader,
         `
@@ -275,7 +278,10 @@ class SignetAgent {
       );
       gl.compileShader(vertexShader);
 
-      const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)!;
+      const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+      if (!fragmentShader) {
+        return "";
+      }
       gl.shaderSource(
         fragmentShader,
         `

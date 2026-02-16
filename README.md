@@ -10,9 +10,12 @@ HiFi Browser Fingerprinting with probabilistic matching that just works. Signet 
 ```bash
 git clone https://github.com/iamgideonidoko/signet.git && cd signet
 cp .env.example .env
-make docker-up && make migrate
-curl http://localhost:6969/health
+make docker-up
+make migrate
+npx live-server --host=localhost --port=3000 --open=demo/index.html
 ```
+
+Demo: http://localhost:3000/demo/index.html
 
 Dashboard: http://localhost:6969/dashboard
 
@@ -46,9 +49,9 @@ Browser (TS Agent) → Go API → Redis Cache → Similarity Engine → PostgreS
 **Client:**
 
 ```html
-<script src="https://your-domain.com/agent.js"></script>
+<script src="https://fp.your-domain.com/agent.js"></script>
 <script>
-  Signet.identify("https://your-domain.com/v1/identify").then((result) => {
+  Signet.identify("https://fp.your-domain.com/v1/identify").then((result) => {
     console.log(result.visitor_id, result.confidence, result.is_new);
   });
 </script>
@@ -82,13 +85,14 @@ POST /v1/identify
 - `GET /metrics` - Prometheus metrics
 - `GET /dashboard` - Analytics UI
 - `GET /agent.js` - Agent script
+- `GET /agent.js.map` - Agent script source map
 
 ## Development
 
 **Stack:** Go 1.25+, Fiber, PostgreSQL 15+, Redis 7+, TypeScript (zero deps)
 
 ```bash
-make install-deps  # Install dependencies
+make install  # Install dependencies
 make build        # Build API + Agent
 make test         # Run tests
 make dev          # Start dev mode (requires air)

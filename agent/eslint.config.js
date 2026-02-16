@@ -6,7 +6,6 @@ import prettierConfig from "eslint-config-prettier";
 export default [
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
-  prettierConfig,
   {
     ignores: ["dist/**", "node_modules/**", "*.config.js", "*.config.ts"],
   },
@@ -87,4 +86,5 @@ export default [
       "prettier/prettier": "error",
     },
   },
+  prettierConfig,
 ];

@@ -2,6 +2,9 @@
 
 HiFi Browser Fingerprinting with probabilistic matching that just works. Signet maintains stable visitor IDs across browser updates via weighted Jaccard similarity (≥75% threshold).
 
+![Signet Demo](./screenshots/signet-demo.jpg)
+![Signet Dashboard](./screenshots/signet-dashboard.jpg)
+
 ## Quick Start
 
 ```bash

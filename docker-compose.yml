@@ -40,8 +40,6 @@ services:
       - .env
     ports:
       - "${API_PORT:-6969}:${API_PORT:-6969}"
-    volumes:
-      - ./agent/dist:/app/agent/dist:ro
     depends_on:
       signet-db:
         condition: service_healthy

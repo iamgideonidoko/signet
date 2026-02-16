@@ -1,4 +1,16 @@
-FROM golang:1.25-alpine AS builder
+FROM node:20-alpine AS agent-builder
+
+WORKDIR /agent
+
+# Copy agent package files
+COPY agent/package.json agent/pnpm-lock.yaml ./
+RUN corepack enable pnpm && pnpm install --frozen-lockfile
+
+# Copy agent source and build
+COPY agent/ ./
+RUN pnpm build
+
+FROM golang:1.25-alpine AS api-builder
 
 RUN apk add --no-cache git
 
@@ -22,11 +34,11 @@ RUN apk --no-cache add ca-certificates tzdata
 
 WORKDIR /app
 
-# Copy binary from builder
-COPY --from=builder /build/signet .
+# Copy binary from api builder
+COPY --from=api-builder /build/signet .
 
-# Create directory for agent
-RUN mkdir -p /app/agent/dist
+# Copy agent build files from agent builder
+COPY --from=agent-builder /agent/dist ./agent/dist
 
 # Expose port
 EXPOSE 6969

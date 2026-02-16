@@ -97,7 +97,7 @@ func main() {
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: false,
 		ServerHeader:          "Signet",
-		AppName:               "Signet API v1.0",
+		AppName:               "Signet API v0.0.1",
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			code := fiber.StatusInternalServerError
 			if e, ok := err.(*fiber.Error); ok {
@@ -134,7 +134,8 @@ func main() {
 	api.Get("/analytics", handler.Analytics)
 	api.Get("/identifications", handler.RecentIdentifications)
 
-	app.Static("/agent.js", "./agent/dist/agent.min.js")
+	app.Static("/agent.js", "./agent/dist/index.iife.js")
+	app.Static("/agent.js.map", "./agent/dist/index.iife.js.map")
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)

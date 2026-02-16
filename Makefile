@@ -1,5 +1,13 @@
 .PHONY: dev build build-api build-agent test lint docker-up docker-down migrate clean
 
+install-api:
+	@go mod download
+
+install-agent:
+	@pnpm --dir agent install
+
+install: install-api install-agent
+
 run:
 	@go run ./cmd/api
 
@@ -10,16 +18,18 @@ dev:
 		echo "air not installed. Install: https://github.com/air-verse/air?tab=readme-ov-file#installation"; \
 	fi
 
-build: build-agent build-api 
+dev-agent:
+	@pnpm --dir agent dev
+
+build: build-agent build-api
 
 build-api:
-	@go mod download
 	@go build -o bin/signet ./cmd/api
 
 build-agent:
-	@cd agent && npm install && npm run build
+	@pnpm --dir agent build
 
-test: 
+test:
 	@go test -v -race -coverprofile=coverage.out ./...
 	@go tool cover -html=coverage.out -o coverage.html
 
@@ -37,6 +47,9 @@ lint:
 		echo "golangci-lint not installed. Install: https://golangci-lint.run/usage/install/"; \
 	fi
 
+lint-agent:
+	pnpm --dir agent lint
+
 docker-up:
 	@docker-compose up -d
 
@@ -44,7 +57,7 @@ docker-up-infra:
 	@docker-compose up -d signet-db signet-cache
 
 # usage: make docker-down s="signet-api"
-s ?= 
+s ?=
 docker-down:
 	docker-compose down $(s)
 
@@ -54,7 +67,7 @@ docker-build:
 migrate:
 	@docker-compose exec signet-db psql -U signet -d signet_db -f /docker-entrypoint-initdb.d/001_create_initial_schema.up.sql
 
-migrate-down: 
+migrate-down:
 	@docker-compose exec signet-db psql -U signet -d signet_db -f /docker-entrypoint-initdb.d/001_create_initial_schema.down.sql
 
 logs:
@@ -72,12 +85,8 @@ clean:
 	@rm -rf agent/node_modules/
 	@rm -f coverage.out coverage.html
 
-psql: 
+psql:
 	@docker-compose exec signet-db psql -U signet -d signet_db
 
 redis-cli:
 	@docker-compose exec signet-cache redis-cli
-
-install-deps:
-	@go mod download
-	@cd agent && npm install

@@ -1,3 +1,5 @@
+> ⚠️ This project is in an early experimental stage and is under active development. Features may be incomplete, unstable, or subject to breaking changes at any time. It is not production-ready and should not be used in production environments.
+
 # signet
 
 Self-hosted hi-fi browser fingerprinting that just works. Signet is a research-backed engine that generates stable Visitor IDs by aggregating 40+ granular signals—including Canvas2D, WebGL, and WASM timings (soon). It uses a self-healing matching algorithm ($\ge 0.75$ Jaccard similarity) to maintain persistence across browser updates and privacy defenses.

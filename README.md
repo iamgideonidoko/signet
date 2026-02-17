@@ -1,6 +1,6 @@
 # signet
 
-HiFi Browser Fingerprinting with probabilistic matching that just works. Signet maintains stable visitor IDs across browser updates via weighted Jaccard similarity (≥75% threshold).
+Self-hosted hi-fi browser fingerprinting that just works. Signet is a research-backed engine that generates stable Visitor IDs by aggregating 40+ granular signals—including Canvas2D, WebGL, and WASM timings (soon). It uses a self-healing matching algorithm ($\ge 0.75$ Jaccard similarity) to maintain persistence across browser updates and privacy defenses.
 
 ![Signet Demo](./screenshots/signet-demo.jpg)
 ![Signet Dashboard](./screenshots/signet-dashboard.jpg)
@@ -93,20 +93,138 @@ POST /v1/identify
 
 ```bash
 make install  # Install dependencies
-make build        # Build API + Agent
-make test         # Run tests
-make dev          # Start dev mode (requires air)
+make build    # Build API + Agent
+make test     # Run tests
+make dev      # Start dev mode (requires air)
 ```
 
 ## Contributing
 
-**Priority areas:** Fingerprinting techniques, performance optimization, security audits, ML similarity scoring.
+Take a look at the roadmap. Priority areas include Fingerprinting techniques, performance optimization, security audits, ML similarity scoring.
 
 ## Roadmap
 
-- WebSocket support, enhanced bot detection
-- ML similarity scoring, Redis Cluster, geo enrichment
-- Multi-region deployment, GraphQL API, fraud detection engine
+**Matching Algorithm:**
+
+- [x] Weighted Jaccard similarity with hardware (0.8), environment (0.5), software (0.2) weights
+- [x] Threshold-based linking (≥0.75) for self-healing across browser updates
+- [x] Visitor ID stability with 48h Redis cache
+- [ ] Adaptive weight learning based on signal stability
+- [ ] Multi-threshold cascading (0.75/0.85/0.95 confidence levels)
+
+**Signal Collection:**
+
+- [x] Canvas 2D rendering with gradient/text and SHA-256 pixel hashing
+- [x] Audio context oscillator fingerprinting with FFT frequency data
+- [x] WebGL vendor/renderer extraction and GPU parameters
+- [x] Hardware concurrency (CPU core count)
+- [x] Font detection (26 fonts tracked)
+- [x] Color gamut and HDR capability detection
+- [x] Challenge-response canvas for device authentication
+- [x] Cross-site tracking detection (same fingerprint across domains)
+- [ ] Canvas farbling/randomization detection
+- [ ] Cross-session canvas stability tracking
+- [ ] Multi-canvas verification for higher confidence
+- [ ] Statistical defense fingerprinting (identify browser/extension anti-FP techniques)
+
+**Privacy & Compliance:**
+
+- [x] IP anonymization via /24 subnet masking (GDPR)
+- [x] Privacy-by-design principles (minimal data collection)
+- [x] GDPR-compliant storage and processing
+- [ ] Clearable fingerprint state (user controls to reset data)
+- [ ] Fingerprint budget API (limit entropy per origin)
+- [ ] Detectability indicators (notify users of fingerprinting)
+- [ ] Do Not Track respect
+
+**Infrastructure:**
+
+- [x] Redis caching with token bucket rate limiting
+- [x] Bot detection (6 heuristics: webdriver, headless, automation APIs)
+- [x] PostgreSQL storage with hardware hash indexing
+
+**Entropy & Uniqueness Scoring:**
+
+- [ ] Shannon entropy calculation per signal: H(X) = -Σ P(xi) log₂ P(xi)
+- [ ] Demographic-adjusted uniqueness scoring by geography
+- [ ] Joint entropy computation: H(X,Y) vs H(X) + H(Y) for correlation
+- [ ] Conditional entropy for information gain measurement
+- [ ] Population-based uniqueness percentiles ("More unique than X%")
+- [ ] Invasiveness classification (low/medium/high entropy thresholds)
+- [ ] Per-signal bits of entropy reporting
+- [ ] Demographic segmentation (country/region-specific analysis)
+- [ ] Entropy stability tracking over time/geography
+- [ ] Attribute correlation detection (OS-browser version pairing)
+
+**Signal Stability & Evolution:**
+
+- [ ] Longitudinal fingerprint analysis (weeks/months tracking)
+- [ ] Attribute persistence metrics per signal
+- [ ] Cross-update resilience scoring (survive browser updates)
+- [ ] Shadow fingerprinting (secondary fingerprints for resilience)
+- [ ] Signal stability scoring (which attributes persist over time)
+- [ ] Fingerprint degradation tracking (how fingerprints decay)
+- [ ] Historical fingerprint database (evolution history per visitor)
+- [ ] Cross-session canvas stability monitoring
+- [ ] Canvas consistency scoring for same-device detection
+- [ ] Taint tracking for fingerprint leakage detection
+- [ ] Third-party vs first-party script analysis
+
+**CSS-Based Fingerprinting:**
+
+- [ ] CSS calc() fingerprinting (browser-specific math differences)
+- [ ] Font metrics via CSS layout (no JavaScript required)
+- [ ] CSS selector support detection
+- [ ] CSS property support testing
+- [ ] Container query fingerprinting
+- [ ] CSS animation timing differences
+- [ ] Media query probing (detailed screen/device capabilities)
+- [ ] CSS-only tracking (97.95% distinction rate, no JS)
+- [ ] Rendering quirks detection (browser-specific layout)
+
+**WebAssembly Timing:**
+
+- [ ] WASM performance timing for CPU microarchitecture detection
+- [ ] SIMD instruction detection and performance
+- [ ] Memory operations profiling (bulk memory, threading, shared buffers)
+- [ ] IEEE 754 floating-point quirks
+- [ ] Exception handling timing patterns
+- [ ] Instruction-level timing (CPU-specific execution)
+- [ ] WASM feature detection (10+ unique signals)
+
+**Behavioral Interaction Tracking:**
+
+- [ ] Mouse movement patterns (trajectory, speed, acceleration)
+- [ ] Keyboard timing analysis (keystroke dynamics)
+- [ ] Scroll behavior tracking (speed, smoothness)
+- [ ] Touch gesture fingerprinting (pressure, size, multi-touch)
+- [ ] Click pattern analysis (timing, precision)
+- [ ] Hover behavior tracking (duration, patterns)
+- [ ] Real-user interaction triggers (fingerprint on genuine events, not page load)
+- [ ] ML-based human vs bot behavioral classification
+- [ ] Event timing fingerprinting (browser-specific latencies)
+
+**Ad Targeting Correlation:**
+
+- [ ] Ad targeting correlation (link fingerprints to ad bidding)
+- [ ] Tracking proof framework (causal evidence for ad targeting)
+- [ ] Fingerprint-to-ad mapping (attribute correlation with ad delivery)
+- [ ] A/B testing with fingerprints (controlled experiments)
+- [ ] Third-party tracker chains (map fingerprint sharing across ad networks)
+- [ ] Real-time bidding analysis (correlate fingerprints with RTB auctions)
+- [ ] CanvasDict spoofing protection (defense against CRSlash attacks)
+- [ ] Multi-canvas verification for authentication
+
+**ML & Adaptive Learning:**
+
+- [ ] Neural network for similarity prediction (hybrid with static Jaccard)
+- [ ] Continual learning for drift adaptation
+
+**Advance Infra:**
+
+- [ ] WebSocket streaming for real-time identification
+- [ ] Geo-enrichment (IP → location with MaxMind/IP2Location)
+- [ ] Prometheus metrics expansion
 
 ## License
 
@@ -116,13 +234,16 @@ make dev          # Start dev mode (requires air)
 
 [Issues](https://github.com/iamgideonidoko/signet/issues)
 
-Reference papers:
+## Reference papers
 
-- [ThresholdFP: Enhanced Durability in Browser Fingerprinting](https://research.sabanciuniv.edu/52205/1/ThresholdFP.pdf) by [ELIF ECEM ŞAMLIOĞLU](http://linkedin.com/in/ecem-%C5%9Faml%C4%B1o%C4%9Flu-b688441b5/), [SINAN EMRE TAŞÇI](linkedin.com/in/sinan-emre-tasci?originalSubdomain=tr), [MUHAMMED FATIH GÜLŞEN](https://www.linkedin.com/in/fatihglsn/), and [AND ALBERT LEVI](https://scholar.google.com/citations?user=ls6NkwEAAAAJ&hl=tr)
-- [How Unique is Whose Web Browser? The Role of Demographics in Browser Fingerprinting](https://arxiv.org/pdf/2410.06954) by [Alex Berke](https://scholar.google.com/citations?user=1SaHM5UAAAAJ&hl=en), [Enrico Bacis](https://scholar.google.com/citations?user=y9SM26UAAAAJ&hl=en), [Badih Ghazi](https://scholar.google.com/citations?user=GBJLTN8AAAAJ&hl=en), [Pritish Kamath](https://scholar.google.com/citations?user=1JFARhUAAAAJ&hl=en), [Ravi Kumar](https://scholar.google.com/citations?user=J_XhIsgAAAAJ&hl=en), [Robin Lassonde](linkedin.com/in/robin-lassonde-5140154b), [Pasin Manurangsi](https://scholar.google.com/citations?user=35hM-PkAAAAJ&hl=en), and [Umar Syed](https://scholar.google.com/citations?user=zKORw8wAAAAJ&hl=en)
-- [Browser Fingerprinting Using WebAssembly](https://arxiv.org/pdf/2506.00719) by [Mordechai Guri](https://scholar.google.com/citations?user=F8gvBUkAAAAJ&hl=en), and Dor Fibert
-- [Cascading Spy Sheets: Exploiting the Complexity of Modern CSS for Email and Browser Fingerprinting](https://publications.cispa.de/articles/conference_contribution/Cascading_Spy_Sheets_Exploiting_the_Complexity_of_Modern_CSS_for_Email_and_Browser_Fingerprinting/27194472) by [Leon Trampert](https://cispa.de/en/people/c01letr), [Daniel Weber](https://cispa.de/en/people/daniel.weber), [Lukas Gerlach](https://cispa.de/en/people/c01luge), [Christian Rossow](https://cispa.de/en/people/rossow), and [Michael Schwarz](https://cispa.de/en/people/c02misc)
-- [Beyond the Crawl: Unmasking Browser Fingerprinting in Real User Interactions](https://arxiv.org/pdf/2502.01608) by [Meenatchi Sundaram Mutu Selva Annamalai](https://scholar.google.com/citations?user=zYVEyL4AAAAJ&hl=en), [Emiliano De Cristofaro](https://scholar.google.com/citations?user=1wfzUuEAAAAJ&hl=en), and [Igor Bilogrevic](https://scholar.google.com/citations?user=7h8KipcAAAAJ&hl=en)
-- [The First Early Evidence of the Use of Browser Fingerprinting for Online Tracking](https://arxiv.org/pdf/2409.15656) by [Zengrui Liu](https://scholar.google.com/citations?user=aUJpMPYAAAAJ&hl=en), [Jimmy Dani](https://scholar.google.com/citations?user=occFbWAAAAAJ&hl=en), [Yinzhi Cao](https://scholar.google.com/citations?user=0jBP_aEAAAAJ&hl=en), [Shujiang Wu](https://scholar.google.com/citations?user=3yQomhcAAAAJ&hl=en), and [Nitesh Saxena](https://scholar.google.com/citations?user=_x5BEjoAAAAJ&hl=en)
-- [Mitigating Browser Fingerprinting in Web Specifications](https://www.w3.org/TR/fingerprinting-guidance/) by [W3C](https://www.w3.org/)
-- [Fingerprinting and Tracing Shadows: The Development and Impact of Browser Fingerprinting](https://www.thinkmind.org/articles/securware_2024_2_160_30065.pdf) by [Alexander Lawall](https://www.linkedin.com/in/prof-dr-alexander-lawall-b927a131b/)
+- [ThresholdFP: Enhanced Durability in Browser Fingerprinting (2025)](https://research.sabanciuniv.edu/52205/1/ThresholdFP.pdf)
+- [How Unique is Whose Web Browser? The Role of Demographics in Browser Fingerprinting (Google 2024)](https://arxiv.org/pdf/2410.06954)
+- [Browser Fingerprinting Using WebAssembly (2025)](https://arxiv.org/pdf/2506.00719)
+- [Cascading Spy Sheets: Exploiting the Complexity of Modern CSS for Email and Browser Fingerprinting (NDSS 2025)](https://publications.cispa.de/articles/conference_contribution/Cascading_Spy_Sheets_Exploiting_the_Complexity_of_Modern_CSS_for_Email_and_Browser_Fingerprinting/27194472)
+- [Beyond the Crawl: Unmasking Browser Fingerprinting in Real User Interactions (WWW 2025)](https://arxiv.org/pdf/2502.01608)
+- [The First Early Evidence of the Use of Browser Fingerprinting for Online Tracking (FPTrace, 2025)](https://arxiv.org/pdf/2409.15656)
+- [Mitigating Browser Fingerprinting in Web Specifications (W3C 2024)](https://www.w3.org/TR/fingerprinting-guidance/)
+- [Fingerprinting and Tracing Shadows: The Development and Impact of Browser Fingerprinting (SECURWARE 2024)](https://www.thinkmind.org/articles/securware_2024_2_160_30065.pdf)
+- [Breaking the Shield: Analyzing and Attacking Canvas Fingerprinting Defenses in the Wild (WWW 2025)](https://www.hoangdainguyen.com/publications/canvas_fp_attack_www25.pdf)
+- [Dual Study of Canvas Fingerprinting Based Authentication: A Novel Spoofing Attack and the Countermeasure (ICDCS 2024)](https://nsaxena.engr.tamu.edu/wp-content/uploads/sites/238/2025/08/Dual_Study_of_Canvas_Fingerprinting_Based_Authentication_A_Novel_Spoofing_Attack_and_the_Countermeasure.pdf)
+- [FP-tracer: Fine-grained Browser Fingerprinting Detection via Taint-tracking and Entropy-based Thresholds (PoPETs 2024)](https://petsymposium.org/popets/2024/popets-2024-0092.pdf)
